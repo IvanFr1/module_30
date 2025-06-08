@@ -34,6 +34,7 @@ jobs:
           # Устанавливаем только SQLAlchemy 2.0+ (без stubs)
           pip install "sqlalchemy>=2.0.0"
           pip install aiosqlite
+          pip install pytest pytest-cov
           
           # Удаляем конфликтующие stubs-пакеты если они есть
           pip uninstall -y sqlalchemy-stubs sqlalchemy2-stubs || true
