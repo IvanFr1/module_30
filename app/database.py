@@ -1,10 +1,7 @@
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine,
-    AsyncSession,
-)
-from sqlalchemy.orm import declarative_base
 from typing import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./recipes.db"
 
