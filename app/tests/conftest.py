@@ -2,7 +2,6 @@ from typing import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
 
 from app.database import engine
 from app.main import app
