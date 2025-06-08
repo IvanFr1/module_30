@@ -1,7 +1,7 @@
 from app import schemas
 
 
-def test_create_recipe(client) -> None:
+def test_create_recipe(client: TestClient) -> None:
     recipe_data = {
         "name": "Тестовый рецепт",
         "cooking_time": 30,
@@ -21,7 +21,7 @@ def test_create_recipe(client) -> None:
     assert isinstance(data["id"], int)
 
 
-def test_read_recipes(client) -> None:
+def test_read_recipes(client: TestClient) -> None:
     # Сначала создаем тестовый рецепт
     client.post(
         "/recipes/",
@@ -42,7 +42,7 @@ def test_read_recipes(client) -> None:
     assert schemas.RecipeListItem(**data[0])
 
 
-def test_read_recipe(client) -> None:
+def test_read_recipe(client: TestClient) -> None:
     # Создаем рецепт
     create_res = client.post(
         "/recipes/",
