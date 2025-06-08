@@ -2,49 +2,58 @@ name: FastAPI CI
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main", "master", "dev" ]
   pull_request:
     branches: [ "**" ]
 
 jobs:
   lint-test:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write  # Даем разрешение на запись
+    
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Необходимо для возможности пушить изменения обратно
-
-      - name: Set up Python
+          fetch-depth: 0
+          # Указываем токен с правами на запись
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r app/requirements.txt
           pip install flake8 black isort mypy pytest
-
-      - name: Run isort (автоформатирование импортов)
+      
+      - name: Autoformat imports with isort
         run: isort app/
-
-      - name: Run Black (автоформатирование кода)
+      
+      - name: Autoformat code with Black
         run: black app/
-
+      
       - name: Commit and push formatting changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
-          git diff --cached --quiet || (git commit -m "Autoformat code with Black and isort" && git push)
-
+          # Проверяем есть ли изменения для коммита
+          if ! git diff --cached --quiet; then
+            git commit -m "Autoformat code with Black and isort [skip ci]"
+            git pull --rebase  # Получаем свежие изменения перед пушем
+            git push origin HEAD:${GITHUB_REF#refs/heads/}
+          fi
+      
       - name: Lint with flake8
         run: flake8 app/
-
+      
       - name: Type checking with mypy
         run: mypy app/
-
+      
       - name: Run tests with pytest
         run: pytest app/tests/
