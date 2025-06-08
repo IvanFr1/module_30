@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, List
+from typing import AsyncIterator, List, Sequence
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
@@ -27,7 +27,7 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/recipes/", response_model=List[schemas.RecipeListItem])
 async def read_recipes(
     skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)
-) -> Sequence[Recipe]:
+) -> List[schemas.RecipeListItem]:
     result = await db.execute(
         select(models.Recipe)
         .order_by(models.Recipe.views.desc(), models.Recipe.cooking_time.asc())
@@ -40,13 +40,15 @@ async def read_recipes(
 @app.get("/recipes/{recipe_id}", response_model=schemas.Recipe)
 async def read_recipe(
     recipe_id: int, db: AsyncSession = Depends(get_db)
-) -> Sequence[Recipe]:
+) -> schemas.Recipe:
     result = await db.execute(
         select(models.Recipe).where(models.Recipe.id == recipe_id)
     )
     recipe = result.scalars().first()
     if not recipe:
         raise HTTPException(status_code=404, detail="Рецепт не найден")
+
+    recipe.views = 0 if recipe.views is None else recipe.views
     recipe.views += 1
     await db.commit()
     await db.refresh(recipe)
@@ -56,7 +58,7 @@ async def read_recipe(
 @app.post("/recipes/", response_model=schemas.Recipe, status_code=201)
 async def create_recipe(
     recipe: schemas.RecipeCreate, db: AsyncSession = Depends(get_db)
-) -> Sequence[Recipe]:
+) -> schemas.Recipe:
     db_recipe = models.Recipe(
         name=recipe.name,
         cooking_time=recipe.cooking_time,
