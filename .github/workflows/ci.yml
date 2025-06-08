@@ -35,7 +35,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r app/requirements.txt
           pip install flake8 black isort mypy pytest autoflake
-          pip install -e .
       
       - name: Remove unused imports
         run: |
