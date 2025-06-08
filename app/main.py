@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import models, schemas
-from .database import engine, get_db
+from app.database import engine, get_db
 
 
 @asynccontextmanager
