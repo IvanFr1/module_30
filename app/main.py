@@ -1,16 +1,17 @@
 from contextlib import asynccontextmanager
-from typing import List
+from typing import AsyncIterator, List
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import models, schemas
 from app.database import engine, get_db
+from app import models, schemas
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> None:
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Асинхронный менеджер контекста для жизненного цикла приложения"""
     # Создание таблиц при запуске
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
