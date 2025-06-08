@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, List, Sequence
+from typing import AsyncIterator, List
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
