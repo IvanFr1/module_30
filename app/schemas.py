@@ -16,7 +16,7 @@ class Recipe(RecipeBase):
     id: int
     views: int
 
-    model_config = ConfigDict(from_attributes=True) 
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecipeListItem(BaseModel):
