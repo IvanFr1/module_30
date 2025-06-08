@@ -35,7 +35,7 @@ async def read_recipes(
         .limit(limit)
     )
     recipes = result.scalars().all()
-    return [schemas.RecipeListItem.from_orm(recipe) for recipe in recipes]
+    return [schemas.RecipeListItem.model_validate(recipe) for recipe in recipes]
 
 
 @app.get("/recipes/{recipe_id}", response_model=schemas.Recipe)
@@ -53,7 +53,7 @@ async def read_recipe(
     recipe.views += 1
     await db.commit()
     await db.refresh(recipe)
-    return schemas.Recipe.from_orm(recipe)
+    return schemas.Recipe.model_validate(recipe)
 
 
 @app.post("/recipes/", response_model=schemas.Recipe, status_code=201)
@@ -69,4 +69,4 @@ async def create_recipe(
     db.add(db_recipe)
     await db.commit()
     await db.refresh(db_recipe)
-    return schemas.Recipe.from_orm(db_recipe)
+    return schemas.Recipe.model_validate(db_recipe)
