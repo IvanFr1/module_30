@@ -5,8 +5,9 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from . import models, schemas
 from app.database import engine, get_db
+
+from . import models, schemas
 
 
 @asynccontextmanager
