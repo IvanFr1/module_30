@@ -1,9 +1,11 @@
 import pytest
-from httpx import AsyncClient
-from app.main import app
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
+
 from app.database import engine
+from app.main import app
 from app.models import Base
+
 
 @pytest.fixture(autouse=True)
 async def prepare_database():
@@ -12,6 +14,7 @@ async def prepare_database():
     yield
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
 
 @pytest.fixture
 def client():
