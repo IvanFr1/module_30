@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,7 +10,7 @@ from app.models import Base
 
 
 @pytest.fixture(autouse=True)
-async def prepare_database() -> AsyncGenerator[AsyncClient, None]:
+async def prepare_database() -> AsyncGenerator[None, None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -19,6 +19,6 @@ async def prepare_database() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def client() -> AsyncGenerator[AsyncClient, None]:
+def client() -> Generator[TestClient, None, None]:
     with TestClient(app) as client:
         yield client
