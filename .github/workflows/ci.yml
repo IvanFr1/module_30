@@ -21,8 +21,9 @@ jobs:
       
       - name: Create init files
         run: |
-          touch app/__init__.py
-          touch app/tests/__init__.py
+          # Создаем __init__.py без пустой строки в конце
+          echo -n > app/__init__.py
+          echo -n > app/tests/__init__.py
       
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -40,6 +41,11 @@ jobs:
         run: |
           autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports -r app/
       
+      - name: Fix blank lines at end of files
+        run: |
+          # Удаляем пустые строки в конце всех .py файлов
+          find app/ -type f -name "*.py" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
+      
       - name: Autoformat imports with isort
         run: isort app/
       
@@ -52,7 +58,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Add init files and fix imports [skip ci]"
+            git commit -m "Clean code: fix formatting and init files [skip ci]"
             git pull --rebase
             git push origin HEAD:${GITHUB_REF#refs/heads/}
           fi
