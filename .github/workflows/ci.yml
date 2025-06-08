@@ -30,18 +30,24 @@ jobs:
           pip install -r app/requirements.txt
           pip install flake8 black isort mypy pytest autoflake
           pip install flake8-black flake8-isort
-          pip install \
-            "sqlalchemy>=2.0.0" \
-            "sqlalchemy2-stubs>=0.0.2a38" \
-            aiosqlite \
-            types-python-dateutil 
+          
+          # Устанавливаем только SQLAlchemy 2.0+ (без stubs)
+          pip install "sqlalchemy>=2.0.0"
+          pip install aiosqlite
+          
+          # Удаляем конфликтующие stubs-пакеты если они есть
+          pip uninstall -y sqlalchemy-stubs sqlalchemy2-stubs || true
       
       - name: Create config files
         run: |
-          # Создаем конфиг для flake8, совместимый с Black
-          echo -e "[flake8]\nmax-line-length = 88\nextend-ignore = E203, W503\nper-file-ignores =\n    __init__.py: F401" > .flake8
+          # Создаем конфиг для mypy
+          echo -e "[mypy]\nplugins = sqlalchemy.ext.mypy.plugin\ndisallow_untyped_defs = True\nignore_missing_imports = True" > mypy.ini
+          
+          # Конфиг для flake8, совместимый с Black
+          echo -e "[flake8]\nmax-line-length = 88\nextend-ignore = E203, W503" > .flake8
+          
+          # Конфиг для isort
           echo -e "[isort]\nprofile = black\nline_length = 88" > .isort.cfg
-          echo -e "[mypy]\nplugins = sqlalchemy.ext.mypy.plugin" > mypy.ini
       
       - name: Create init files
         run: |
@@ -74,11 +80,12 @@ jobs:
           fi
       
       - name: Lint with flake8
-        run: |
-          flake8 app/ --max-line-length=88 --extend-ignore=E203,W503
+        run: flake8 app/
       
       - name: Type checking with mypy
         run: |
+          # Дополнительная проверка, что stubs удалены
+          pip uninstall -y sqlalchemy-stubs sqlalchemy2-stubs || true
           mypy app/ --config-file=mypy.ini
       
       - name: Run tests with pytest
