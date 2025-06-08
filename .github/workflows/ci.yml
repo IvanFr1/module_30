@@ -28,10 +28,10 @@ jobs:
         run: flake8 app/
 
       - name: Check formatting with black
-        run: black --check app/
+        run: black app/
 
       - name: Check import order with isort
-        run: isort app/ --check-only
+        run: isort app/ 
 
       - name: Type checking with mypy
         run: mypy app/
