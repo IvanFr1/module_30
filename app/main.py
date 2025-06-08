@@ -38,7 +38,9 @@ async def read_recipes(
 
 
 @app.get("/recipes/{recipe_id}", response_model=schemas.Recipe)
-async def read_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+async def read_recipe(
+    recipe_id: int, db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
     result = await db.execute(
         select(models.Recipe).where(models.Recipe.id == recipe_id)
     )
