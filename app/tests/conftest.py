@@ -1,11 +1,13 @@
+from typing import AsyncGenerator
+
 import pytest
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from app.database import engine
 from app.main import app
 from app.models import Base
-from typing import AsyncGenerator
-from httpx import AsyncClient
+
 
 @pytest.fixture(autouse=True)
 async def prepare_database() -> AsyncGenerator[AsyncClient, None]:
