@@ -19,12 +19,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Create init files
-        run: |
-          # Создаем __init__.py без пустой строки в конце
-          echo -n > app/__init__.py
-          echo -n > app/tests/__init__.py
-      
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
@@ -34,7 +28,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r app/requirements.txt
-          pip install flake8 black isort mypy pytest autoflake sqlalchemy2-stubs
+          pip install flake8 black isort mypy pytest autoflake sqlalchemy2-stubs types-aiosqlite
+          pip install flake8-black flake8-isort  # Добавляем плагины для совместимости
+      
+      - name: Create config files
+        run: |
+          # Создаем конфиг для flake8, совместимый с Black
+          echo -e "[flake8]\nmax-line-length = 88\nextend-ignore = E203, W503\nper-file-ignores =\n    __init__.py: F401" > .flake8
+          echo -e "[isort]\nprofile = black\nline_length = 88" > .isort.cfg
+          echo -e "[mypy]\nplugins = sqlalchemy.ext.mypy.plugin" > mypy.ini
+      
+      - name: Create init files
+        run: |
+          echo -n > app/__init__.py
+          echo -n > app/tests/__init__.py
       
       - name: Remove unused imports
         run: |
@@ -42,7 +49,6 @@ jobs:
       
       - name: Fix blank lines at end of files
         run: |
-          # Удаляем пустые строки в конце всех .py файлов
           find app/ -type f -name "*.py" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
       
       - name: Autoformat imports with isort
@@ -63,10 +69,16 @@ jobs:
           fi
       
       - name: Lint with flake8
-        run: flake8 app/
+        run: |
+          flake8 app/ --max-line-length=88 --extend-ignore=E203,W503
       
       - name: Type checking with mypy
-        run: mypy app/
+        run: |
+          mypy app/ --config-file=mypy.ini
       
       - name: Run tests with pytest
-        run: pytest app/tests/
+        run: |
+          pytest app/tests/ -v --cov=app --cov-report=xml
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
