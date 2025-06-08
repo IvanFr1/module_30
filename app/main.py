@@ -1,17 +1,16 @@
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, List
+from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import engine, get_db
-
-from . import models, schemas
+from app import models, schemas
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> None:
     # Создание таблиц при запуске
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
@@ -34,7 +33,8 @@ async def read_recipes(
         .offset(skip)
         .limit(limit)
     )
-    return result.scalars().all()
+    recipes = result.scalars().all()
+    return [schemas.RecipeListItem.from_orm(recipe) for recipe in recipes]
 
 
 @app.get("/recipes/{recipe_id}", response_model=schemas.Recipe)
@@ -52,7 +52,7 @@ async def read_recipe(
     recipe.views += 1
     await db.commit()
     await db.refresh(recipe)
-    return recipe
+    return schemas.Recipe.from_orm(recipe)
 
 
 @app.post("/recipes/", response_model=schemas.Recipe, status_code=201)
@@ -68,4 +68,4 @@ async def create_recipe(
     db.add(db_recipe)
     await db.commit()
     await db.refresh(db_recipe)
-    return db_recipe
+    return schemas.Recipe.from_orm(db_recipe)
