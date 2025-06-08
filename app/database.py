@@ -1,7 +1,10 @@
-from typing import AsyncGenerator
-
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    create_async_engine,
+    AsyncSession,
+)
 from sqlalchemy.orm import declarative_base
+from typing import AsyncGenerator
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./recipes.db"
 
@@ -11,7 +14,7 @@ engine = create_async_engine(
     future=True,
 )
 
-AsyncSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     expire_on_commit=False,
     class_=AsyncSession,
